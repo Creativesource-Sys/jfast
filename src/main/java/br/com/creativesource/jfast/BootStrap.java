@@ -3,6 +3,7 @@ package br.com.creativesource.jfast;
 import java.util.LinkedHashMap;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import br.com.creativesource.jfast.servers.NettyTcpServer;
 import lombok.Getter;
@@ -25,6 +26,9 @@ public class BootStrap {
 	private Consumer<String> messageConsumer;
 	
 	@Getter
+	private Predicate<String> predicate;
+	
+	@Getter
 	private LinkedHashMap<String, Object> options = new LinkedHashMap<>();
 	
 	public static BootStrapBuilder builder() {
@@ -36,6 +40,7 @@ public class BootStrap {
 		private int port;
 		private int maxFrameBuffer;
 		private Consumer<String> messageConsumer;
+		private Predicate<String> predicate;
 		private Class<? extends Server> server;
 		private LinkedHashMap<String, Object> channelHandlerOptions = new LinkedHashMap<>();
 		
@@ -48,6 +53,11 @@ public class BootStrap {
 		
 		public BootStrapBuilder maxFrameBuffer(int maxFrameBuffer) {
 			this.maxFrameBuffer =  maxFrameBuffer;
+			return this;
+		}
+		
+		public BootStrapBuilder filter(Predicate<String> predicate) {
+			this.predicate = predicate;
 			return this;
 		}
 		
@@ -69,15 +79,17 @@ public class BootStrap {
 		public Server build() throws InstantiationException, IllegalAccessException, ClassNotFoundException {
 		    
 			Object target;
-			if(this.server == null) {
+			if(Objects.isNull(this.server)) {
 				Class<?> targetClass = this.getClass().getClassLoader().loadClass(DEFAULT_SERVER_CLASS_IMPL.getName());
 				target = targetClass.newInstance();
 			}else {
 				target = this.server.newInstance();
 			}
-			if(target == null) {
+			
+			if(Objects.isNull(target)) {
 				throw new IllegalStateException("Error");
 			}
+			
 			System.out.println(target);
 			return build(target);
 		}
@@ -88,6 +100,10 @@ public class BootStrap {
 			}
 			
 			mirror.on(target).set().field("messageConsumer").withValue(this.messageConsumer);
+			
+			if(!Objects.isNull(this.predicate)) {
+				mirror.on(target).set().field("predicate").withValue(predicate);
+			}
 			
 			if(!Objects.isNull(this.port)) {
 				mirror.on(target).set().field("port").withValue(this.port);

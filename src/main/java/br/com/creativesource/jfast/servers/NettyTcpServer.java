@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import javax.annotation.PreDestroy;
 
@@ -43,6 +44,9 @@ public class NettyTcpServer implements Server {
 	
 	@Getter 
 	private Consumer<String> messageConsumer;
+	
+	@Getter
+	private Predicate<String> predicate;
 	
 	private Channel channel;
 	private EventLoopGroup childGroup;
@@ -106,6 +110,14 @@ public class NettyTcpServer implements Server {
 		childGroup.shutdownGracefully().get();
 		log.info("NettyTcpServer closed. Shutdown instance {}", started.getAndDecrement());
 	}
+	
+	@Override
+	public boolean filter(Predicate<String> predicate, String message) {
+		if(Objects.isNull(predicate)) {
+			return true;
+		}
+		return predicate.test(message);
+	}
 
 	private ServerBootstrap configure() {
 		parentGroup = new NioEventLoopGroup(1);
@@ -132,13 +144,25 @@ public class NettyTcpServer implements Server {
 						pipeline.addLast("lineFrame", new LineBasedFrameDecoder(maxFrameBuffer));
 						pipeline.addLast("decoder", new StringDecoder());
 						pipeline.addLast("encoder", new StringEncoder());
+						
+						//add filter
+						pipeline.addLast("filter", new ChannelInboundHandlerAdapter() {
+							
+							@Override
+			                public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+								if(filter(predicate, (String)msg)) {
+									ctx.fireChannelRead(msg);
+								}
+			                }
+						});
 
+						//add messae handling 
 						pipeline.addLast("handler", new ChannelInboundHandlerAdapter() {
 							
 							@Override
 							public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 								log.debug("Message Received and forward to ConsumerProcessor. Msg -> {}", msg);
-								messageConsumer.accept((String) msg);
+									messageConsumer.accept((String) msg);
 							}
 						});
 					}
@@ -161,5 +185,6 @@ public class NettyTcpServer implements Server {
 					}
 				});
 	}
+
 
 }
