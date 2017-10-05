@@ -104,11 +104,9 @@ public class BootStrap {
 		}
 
 		private Server build(Object target) {
-			if(Objects.isNull(messageConsumer)) {
-				throw new IllegalStateException("You must define MessageConsumer!");
+			if(!Objects.isNull(messageConsumer)) {
+				mirror.on(target).set().field("messageConsumer").withValue(this.messageConsumer);
 			}
-			
-			mirror.on(target).set().field("messageConsumer").withValue(this.messageConsumer);
 			
 			if(!Objects.isNull(this.predicate)) {
 				mirror.on(target).set().field("predicate").withValue(this.predicate);

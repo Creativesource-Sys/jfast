@@ -89,6 +89,10 @@ public class NettyTcpServer implements Server {
 
 	@Override
 	public void start() throws Exception {
+		if(!Objects.isNull(messageConsumer)) {
+			throw new IllegalStateException("You must define MessageConsumer!");
+		}
+		
 		this.port = (this.port > 0 ? this.port : DEFAULT_PORT);
 		this.maxFrameBuffer = (maxFrameBuffer > 0 ? maxFrameBuffer : DEFAULT_MAX_FAMEBUFFER);
 		ServerBootstrap bootstrap = configure();
@@ -100,6 +104,10 @@ public class NettyTcpServer implements Server {
 
 	@Override
 	public void start(int port) throws Exception {
+		if(!Objects.isNull(messageConsumer)) {
+			throw new IllegalStateException("You must define MessageConsumer!");
+		}
+		
 		this.maxFrameBuffer = (maxFrameBuffer > 0 ? maxFrameBuffer : DEFAULT_MAX_FAMEBUFFER);
 		ServerBootstrap bootstrap = configure();
 		
@@ -172,7 +180,6 @@ public class NettyTcpServer implements Server {
 									if(autoclose) {
 										ctx.close();
 									}
-									
 							}
 						});
 					}
