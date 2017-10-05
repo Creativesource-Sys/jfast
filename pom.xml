@@ -5,7 +5,7 @@
 
 	<groupId>br.com.crb</groupId>
 	<artifactId>jfast</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>v0.1-beta.2</version>
 	<packaging>jar</packaging>
 
 	<name>JFast</name>
