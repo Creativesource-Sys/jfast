@@ -89,19 +89,22 @@ public class NettyTcpServer implements Server {
 
 	@Override
 	public void start() throws Exception {
-		ServerBootstrap bootstrap = configure();
 		this.port = (this.port > 0 ? this.port : DEFAULT_PORT);
+		this.maxFrameBuffer = (maxFrameBuffer > 0 ? maxFrameBuffer : DEFAULT_MAX_FAMEBUFFER);
+		ServerBootstrap bootstrap = configure();
+		
 		channel = bootstrap.bind(this.port).channel();
-		log.info("NettyTcpServer started on Port {}", this.port);
+		log.info("NettyTcpServer started on Port {}. With Max Frame Buffer {}", port, this.maxFrameBuffer);
 		started.incrementAndGet();
 	}
 
 	@Override
 	public void start(int port) throws Exception {
+		this.maxFrameBuffer = (maxFrameBuffer > 0 ? maxFrameBuffer : DEFAULT_MAX_FAMEBUFFER);
 		ServerBootstrap bootstrap = configure();
 		
 		channel = bootstrap.bind(port).channel();
-		log.info("NettyTcpServer started on Port {}", port);
+		log.info("NettyTcpServer started on Port {}. With Max Frame Buffer {}", port, this.maxFrameBuffer);
 		started.incrementAndGet();
 	}
 
@@ -144,7 +147,7 @@ public class NettyTcpServer implements Server {
 					protected void initChannel(SocketChannel channel) throws Exception {
 						ChannelPipeline pipeline = channel.pipeline();
 						
-						pipeline.addLast("lineFrame", new LineBasedFrameDecoder( (maxFrameBuffer > 0 ? maxFrameBuffer : DEFAULT_MAX_FAMEBUFFER) ));
+						pipeline.addLast("lineFrame", new LineBasedFrameDecoder(maxFrameBuffer));
 						pipeline.addLast("decoder", new StringDecoder());
 						pipeline.addLast("encoder", new StringEncoder());
 						
