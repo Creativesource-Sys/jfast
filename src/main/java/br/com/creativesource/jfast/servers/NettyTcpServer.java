@@ -89,7 +89,7 @@ public class NettyTcpServer implements Server {
 
 	@Override
 	public void start() throws Exception {
-		if(!Objects.isNull(messageConsumer)) {
+		if(Objects.isNull(messageConsumer)) {
 			throw new IllegalStateException("You must define MessageConsumer!");
 		}
 		
@@ -104,7 +104,7 @@ public class NettyTcpServer implements Server {
 
 	@Override
 	public void start(int port) throws Exception {
-		if(!Objects.isNull(messageConsumer)) {
+		if(Objects.isNull(messageConsumer)) {
 			throw new IllegalStateException("You must define MessageConsumer!");
 		}
 		
