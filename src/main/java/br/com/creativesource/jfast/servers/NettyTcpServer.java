@@ -48,6 +48,9 @@ public class NettyTcpServer implements Server {
 	@Getter
 	private Predicate<String> predicate;
 	
+	@Getter
+	private boolean autoclose = false;
+	
 	private Channel channel;
 	private EventLoopGroup childGroup;
 	private EventLoopGroup parentGroup;
@@ -163,6 +166,10 @@ public class NettyTcpServer implements Server {
 							public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 								log.debug("Message Received and forward to ConsumerProcessor. Msg -> {}", msg);
 									messageConsumer.accept((String) msg);
+									if(autoclose) {
+										ctx.close();
+									}
+									
 							}
 						});
 					}

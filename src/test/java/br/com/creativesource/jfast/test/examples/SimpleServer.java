@@ -9,6 +9,7 @@ public class SimpleServer {
 		Server server = BootStrap.builder()
 				.port(5252)
 				.maxFrameBuffer(2000)
+				.autoclose(true)
 				.messageConsumer(System.out::println)
 				.build();
 		

@@ -29,6 +29,9 @@ public class BootStrap {
 	private Predicate<String> predicate;
 	
 	@Getter
+	private boolean autoclose = false;
+	
+	@Getter
 	private LinkedHashMap<String, Object> options = new LinkedHashMap<>();
 	
 	public static BootStrapBuilder builder() {
@@ -41,6 +44,7 @@ public class BootStrap {
 		private int maxFrameBuffer;
 		private Consumer<String> messageConsumer;
 		private Predicate<String> predicate;
+		private boolean autoclose = false;
 		private Class<? extends Server> server;
 		private LinkedHashMap<String, Object> channelHandlerOptions = new LinkedHashMap<>();
 		
@@ -68,6 +72,11 @@ public class BootStrap {
 		
 		public BootStrapBuilder server(Class<? extends Server> server) {
 			this.server = server;
+			return this;
+		}
+		
+		public BootStrapBuilder autoclose(boolean autoclose) {
+			this.autoclose = autoclose;
 			return this;
 		}
 		
@@ -102,7 +111,11 @@ public class BootStrap {
 			mirror.on(target).set().field("messageConsumer").withValue(this.messageConsumer);
 			
 			if(!Objects.isNull(this.predicate)) {
-				mirror.on(target).set().field("predicate").withValue(predicate);
+				mirror.on(target).set().field("predicate").withValue(this.predicate);
+			}
+			
+			if(!Objects.isNull(this.autoclose)) {
+				mirror.on(target).set().field("autoclose").withValue(this.autoclose);
 			}
 			
 			if(!Objects.isNull(this.port)) {
