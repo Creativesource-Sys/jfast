@@ -87,7 +87,7 @@ public class NettyTcpServer implements Server {
 	@Override
 	public void start() throws Exception {
 		ServerBootstrap bootstrap = configure();
-
+		this.port = (this.port > 0 ? this.port : DEFAULT_PORT);
 		channel = bootstrap.bind(this.port).channel();
 		log.info("NettyTcpServer started on Port {}", this.port);
 		started.incrementAndGet();
@@ -141,7 +141,7 @@ public class NettyTcpServer implements Server {
 					protected void initChannel(SocketChannel channel) throws Exception {
 						ChannelPipeline pipeline = channel.pipeline();
 						
-						pipeline.addLast("lineFrame", new LineBasedFrameDecoder(maxFrameBuffer));
+						pipeline.addLast("lineFrame", new LineBasedFrameDecoder( (maxFrameBuffer > 0 ? maxFrameBuffer : DEFAULT_MAX_FAMEBUFFER) ));
 						pipeline.addLast("decoder", new StringDecoder());
 						pipeline.addLast("encoder", new StringEncoder());
 						
